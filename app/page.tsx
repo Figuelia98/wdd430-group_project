@@ -1,28 +1,43 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  Popover,
-  PopoverButton,
-  PopoverGroup,
-  PopoverPanel,
-  Tab,
-  TabGroup,
-  TabList,
-  TabPanel,
-  TabPanels,
-} from "@headlessui/react";
-import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
   QuestionMarkCircleIcon,
   ShoppingBagIcon,
-  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
+import { StarIcon } from "@heroicons/react/24/solid";
+import Link from "next/link";
+import Navigation from "@/components/Navigation";
+import { useAuth } from "@/contexts/AuthContext";
+
+// Database interfaces
+interface Category {
+  _id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  image?: string;
+}
+
+interface Product {
+  _id: string;
+  name: string;
+  slug: string;
+  shortDescription?: string;
+  price: number;
+  comparePrice?: number;
+  images: string[];
+  category: Category;
+  seller: {
+    _id: string;
+    name: string;
+    businessName?: string;
+  };
+  averageRating: number;
+  totalReviews: number;
+  isFeatured: boolean;
+}
 
 const currencies = ["CAD", "USD", "AUD", "EUR", "GBP"];
 const navigation = {
@@ -172,173 +187,77 @@ const collections = [
 ];
 const footerNavigation = {
   shop: [
-    { name: "Bags", href: "#" },
-    { name: "Tees", href: "#" },
-    { name: "Objects", href: "#" },
-    { name: "Home Goods", href: "#" },
-    { name: "Accessories", href: "#" },
+    { name: "All Products", href: "/products" },
+    { name: "Jewelry & Accessories", href: "/products?category=jewelry-accessories" },
+    { name: "Home & Living", href: "/products?category=home-living" },
+    { name: "Art & Collectibles", href: "/products?category=art-collectibles" },
+    { name: "Featured Items", href: "/products?featured=true" },
   ],
   company: [
-    { name: "Who we are", href: "#" },
-    { name: "Sustainability", href: "#" },
-    { name: "Press", href: "#" },
-    { name: "Careers", href: "#" },
-    { name: "Terms & Conditions", href: "#" },
-    { name: "Privacy", href: "#" },
+    { name: "About Handcrafted Haven", href: "/about" },
+    { name: "Our Artisans", href: "/artisans" },
+    { name: "Quality Promise", href: "/quality-promise" },
+    { name: "Terms & Conditions", href: "/terms" },
+    { name: "Privacy Policy", href: "/privacy" },
   ],
   account: [
-    { name: "Manage Account", href: "#" },
-    { name: "Returns & Exchanges", href: "#" },
-    { name: "Redeem a Gift Card", href: "#" },
+    { name: "Help Center", href: "/help" },
+    { name: "Contact Support", href: "/contact" },
+    { name: "Returns & Exchanges", href: "/returns" },
   ],
   connect: [
-    { name: "Contact Us", href: "#" },
-    { name: "Facebook", href: "#" },
-    { name: "Instagram", href: "#" },
-    { name: "Pinterest", href: "#" },
+    { name: "Contact Us", href: "/contact" },
+    { name: "Facebook", href: "https://facebook.com/handcraftedhaven" },
+    { name: "Instagram", href: "https://instagram.com/handcraftedhaven" },
+    { name: "Pinterest", href: "https://pinterest.com/handcraftedhaven" },
   ],
 };
 
 export default function Example() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dbCategories, setDbCategories] = useState<Category[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      // Fetch categories from database
+      const categoriesResponse = await fetch('/api/categories');
+      if (categoriesResponse.ok) {
+        const categoriesData = await categoriesResponse.json();
+        setDbCategories(categoriesData.categories.slice(0, 5)); // Show first 5 categories
+      }
+
+      // Fetch featured products
+      const productsResponse = await fetch('/api/products?featured=true&limit=6');
+      if (productsResponse.ok) {
+        const productsData = await productsResponse.json();
+        setFeaturedProducts(productsData.products);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }, (_, i) => (
+      <StarIcon
+        key={i}
+        className={`h-4 w-4 ${i < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+      />
+    ));
+  };
 
   return (
     <div className="bg-white">
-      {/* Mobile menu */}
-      <Dialog
-        open={mobileMenuOpen}
-        onClose={setMobileMenuOpen}
-        className="relative z-40 lg:hidden"
-      >
-        <DialogBackdrop
-          transition
-          className="fixed inset-0 bg-black/25 transition-opacity duration-300 ease-linear data-closed:opacity-0"
-        />
-        <div className="fixed inset-0 z-40 flex">
-          <DialogPanel
-            transition
-            className="relative flex w-full max-w-xs transform flex-col overflow-y-auto bg-white pb-12 shadow-xl transition duration-300 ease-in-out data-closed:-translate-x-full"
-          >
-            <div className="flex px-4 pt-5 pb-2">
-              <button
-                type="button"
-                onClick={() => setMobileMenuOpen(false)}
-                className="relative -m-2 inline-flex items-center justify-center rounded-md p-2 text-gray-400"
-              >
-                <span className="absolute -inset-0.5" />
-                <span className="sr-only">Close menu</span>
-                <XMarkIcon aria-hidden="true" className="size-6" />
-              </button>
-            </div>
-
-            {/* Links */}
-            <TabGroup className="mt-2">
-              <div className="border-b border-gray-200">
-                <TabList className="-mb-px flex space-x-8 px-4">
-                  {navigation.categories.map((category) => (
-                    <Tab
-                      key={category.name}
-                      className="flex-1 border-b-2 border-transparent px-1 py-4 text-base font-medium whitespace-nowrap text-gray-900 data-selected:border-indigo-600 data-selected:text-indigo-600"
-                    >
-                      {category.name}
-                    </Tab>
-                  ))}
-                </TabList>
-              </div>
-              <TabPanels as={Fragment}>
-                {navigation.categories.map((category) => (
-                  <TabPanel
-                    key={category.name}
-                    className="space-y-12 px-4 py-6"
-                  >
-                    <div className="grid grid-cols-2 gap-x-4 gap-y-10">
-                      {category.featured.map((item) => (
-                        <div key={item.name} className="group relative">
-                          <img
-                            alt={item.imageAlt}
-                            src={item.imageSrc}
-                            className="aspect-square w-full rounded-md bg-gray-100 object-cover group-hover:opacity-75"
-                          />
-                          <a
-                            href={item.href}
-                            className="mt-6 block text-sm font-medium text-gray-900"
-                          >
-                            <span
-                              aria-hidden="true"
-                              className="absolute inset-0 z-10"
-                            />
-                            {item.name}
-                          </a>
-                          <p
-                            aria-hidden="true"
-                            className="mt-1 text-sm text-gray-500"
-                          >
-                            Shop now
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </TabPanel>
-                ))}
-              </TabPanels>
-            </TabGroup>
-
-            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {navigation.pages.map((page) => (
-                <div key={page.name} className="flow-root">
-                  <a
-                    href={page.href}
-                    className="-m-2 block p-2 font-medium text-gray-900"
-                  >
-                    {page.name}
-                  </a>
-                </div>
-              ))}
-            </div>
-
-            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              <div className="flow-root">
-                <a
-                  href="#"
-                  className="-m-2 block p-2 font-medium text-gray-900"
-                >
-                  Create an account
-                </a>
-              </div>
-              <div className="flow-root">
-                <a
-                  href="#"
-                  className="-m-2 block p-2 font-medium text-gray-900"
-                >
-                  Sign in
-                </a>
-              </div>
-            </div>
-
-            <div className="space-y-6 border-t border-gray-200 px-4 py-6">
-              {/* Currency selector */}
-              <form>
-                <div className="-ml-2 inline-grid grid-cols-1">
-                  <select
-                    id="mobile-currency"
-                    name="currency"
-                    aria-label="Currency"
-                    className="col-start-1 row-start-1 w-full appearance-none rounded-md bg-white py-0.5 pr-7 pl-2 text-base font-medium text-gray-700 group-hover:text-gray-800 focus:outline-2 sm:text-sm/6"
-                  >
-                    {currencies.map((currency) => (
-                      <option key={currency}>{currency}</option>
-                    ))}
-                  </select>
-                  <ChevronDownIcon
-                    aria-hidden="true"
-                    className="pointer-events-none col-start-1 row-start-1 mr-1 size-5 self-center justify-self-end fill-gray-500"
-                  />
-                </div>
-              </form>
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+      <Navigation />
+      {/* Mobile menu - handled by Navigation component */}
 
       {/* Hero section */}
       <div className="relative bg-gray-900">
@@ -381,20 +300,7 @@ export default function Example() {
                   </div>
                 </form>
 
-                <div className="flex items-center space-x-6">
-                  <a
-                    href="#"
-                    className="text-sm font-medium text-white hover:text-gray-100"
-                  >
-                    Sign in
-                  </a>
-                  <a
-                    href="#"
-                    className="text-sm font-medium text-white hover:text-gray-100"
-                  >
-                    Create an account
-                  </a>
-                </div>
+
               </div>
             </div>
 
@@ -403,122 +309,11 @@ export default function Example() {
               <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div>
                   <div className="flex h-16 items-center justify-between">
-                    {/* Logo (lg+) */}
-                    <div className="hidden lg:flex lg:flex-1 lg:items-center">
-                      <a href="#">
-                        <span className="sr-only">Your Company</span>
-                        <img
-                          alt=""
-                          src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=white"
-                          className="h-8 w-auto"
-                        />
-                      </a>
-                    </div>
+                    {/* Logo handled by Navigation component */}
 
-                    <div className="hidden h-full lg:flex">
-                      {/* Flyout menus */}
-                      <PopoverGroup className="inset-x-0 bottom-0 px-4">
-                        <div className="flex h-full justify-center space-x-8">
-                          {navigation.categories.map((category) => (
-                            <Popover key={category.name} className="flex">
-                              <div className="relative flex">
-                                <PopoverButton className="group relative flex items-center justify-center text-sm font-medium text-white transition-colors duration-200 ease-out">
-                                  {category.name}
-                                  <span
-                                    aria-hidden="true"
-                                    className="absolute inset-x-0 -bottom-px z-30 h-0.5 transition duration-200 ease-out group-data-open:bg-white"
-                                  />
-                                </PopoverButton>
-                              </div>
-                              <PopoverPanel
-                                transition
-                                className="absolute inset-x-0 top-full z-20 w-full bg-white text-sm text-gray-500 transition data-closed:opacity-0 data-enter:duration-200 data-enter:ease-out data-leave:duration-150 data-leave:ease-in"
-                              >
-                                {/* Presentational element used to render the bottom shadow, if we put the shadow on the actual panel it pokes out the top, so we use this shorter element to hide the top of the shadow */}
-                                <div
-                                  aria-hidden="true"
-                                  className="absolute inset-0 top-1/2 bg-white shadow-sm"
-                                />
-                                <div className="relative bg-white">
-                                  <div className="mx-auto max-w-7xl px-8">
-                                    <div className="grid grid-cols-4 gap-x-8 gap-y-10 py-16">
-                                      {category.featured.map((item) => (
-                                        <div
-                                          key={item.name}
-                                          className="group relative"
-                                        >
-                                          <img
-                                            alt={item.imageAlt}
-                                            src={item.imageSrc}
-                                            className="aspect-square w-full rounded-md bg-gray-100 object-cover group-hover:opacity-75"
-                                          />
-                                          <a
-                                            href={item.href}
-                                            className="mt-4 block font-medium text-gray-900"
-                                          >
-                                            <span
-                                              aria-hidden="true"
-                                              className="absolute inset-0 z-10"
-                                            />
-                                            {item.name}
-                                          </a>
-                                          <p
-                                            aria-hidden="true"
-                                            className="mt-1"
-                                          >
-                                            Shop now
-                                          </p>
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </div>
-                              </PopoverPanel>
-                            </Popover>
-                          ))}
-                          {navigation.pages.map((page) => (
-                            <a
-                              key={page.name}
-                              href={page.href}
-                              className="flex items-center text-sm font-medium text-white"
-                            >
-                              {page.name}
-                            </a>
-                          ))}
-                        </div>
-                      </PopoverGroup>
-                    </div>
+                    {/* Navigation handled by Navigation component */}
 
-                    {/* Mobile menu and search (lg-) */}
-                    <div className="flex flex-1 items-center lg:hidden">
-                      <button
-                        type="button"
-                        onClick={() => setMobileMenuOpen(true)}
-                        className="-ml-2 p-2 text-white"
-                      >
-                        <span className="sr-only">Open menu</span>
-                        <Bars3Icon aria-hidden="true" className="size-6" />
-                      </button>
-
-                      {/* Search */}
-                      <a href="#" className="ml-2 p-2 text-white">
-                        <span className="sr-only">Search</span>
-                        <MagnifyingGlassIcon
-                          aria-hidden="true"
-                          className="size-6"
-                        />
-                      </a>
-                    </div>
-
-                    {/* Logo (lg-) */}
-                    <a href="#" className="lg:hidden">
-                      <span className="sr-only">Your Company</span>
-                      <img
-                        alt=""
-                        src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=white"
-                        className="h-8 w-auto"
-                      />
-                    </a>
+                    {/* Logo handled by Navigation component */}
 
                     <div className="flex flex-1 items-center justify-end">
                       <a
@@ -573,19 +368,36 @@ export default function Example() {
 
         <div className="relative mx-auto flex max-w-3xl flex-col items-center px-6 py-32 text-center sm:py-64 lg:px-0">
           <h1 className="text-4xl font-bold tracking-tight text-white lg:text-6xl">
-            New arrivals are here
+            Welcome to Handcrafted Haven
           </h1>
           <p className="mt-4 text-xl text-white">
-            The new arrivals have, well, newly arrived. Check out the latest
-            options from our summer small-batch release while they're still in
-            stock.
+            Discover unique, handmade treasures from talented artisans around the world.
+            Every piece tells a story, every purchase supports a creator.
           </p>
-          <a
-            href="#"
-            className="mt-8 inline-block rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100"
-          >
-            Shop New Arrivals
-          </a>
+          <div className="mt-8 flex flex-col sm:flex-row gap-4">
+            <Link
+              href="/products"
+              className="inline-block rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100"
+            >
+              Shop Handcrafted Items
+            </Link>
+            {!user && (
+              <Link
+                href="/register"
+                className="inline-block rounded-md border-2 border-white px-8 py-3 text-base font-medium text-white hover:bg-white hover:text-gray-900"
+              >
+                Join as Artisan
+              </Link>
+            )}
+            {user?.role === 'seller' && (
+              <Link
+                href="/seller/profile"
+                className="inline-block rounded-md border-2 border-white px-8 py-3 text-base font-medium text-white hover:bg-white hover:text-gray-900"
+              >
+                Seller Dashboard
+              </Link>
+            )}
+          </div>
         </div>
       </div>
 
@@ -602,54 +414,77 @@ export default function Example() {
             >
               Shop by Category
             </h2>
-            <a
-              href="#"
+            <Link
+              href="/products"
               className="hidden text-sm font-semibold text-indigo-600 hover:text-indigo-500 sm:block"
             >
-              Browse all categories
+              Browse all products
               <span aria-hidden="true"> &rarr;</span>
-            </a>
+            </Link>
           </div>
 
           <div className="mt-4 flow-root">
             <div className="-my-2">
               <div className="relative box-content h-80 overflow-x-auto py-2 xl:overflow-visible">
                 <div className="absolute flex space-x-8 px-4 sm:px-6 lg:px-8 xl:relative xl:grid xl:grid-cols-5 xl:gap-x-8 xl:space-x-0 xl:px-0">
-                  {categories.map((category) => (
-                    <a
-                      key={category.name}
-                      href={category.href}
-                      className="relative flex h-80 w-56 flex-col overflow-hidden rounded-lg p-6 hover:opacity-75 xl:w-auto"
-                    >
-                      <span aria-hidden="true" className="absolute inset-0">
-                        <img
-                          alt=""
-                          src={category.imageSrc}
-                          className="size-full object-cover"
+                  {loading ? (
+                    // Loading placeholder
+                    Array.from({ length: 5 }, (_, i) => (
+                      <div
+                        key={i}
+                        className="relative flex h-80 w-56 flex-col overflow-hidden rounded-lg p-6 xl:w-auto bg-gray-200 animate-pulse"
+                      >
+                        <div className="relative mt-auto text-center text-xl font-bold text-gray-400">
+                          Loading...
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    dbCategories.map((category) => (
+                      <Link
+                        key={category._id}
+                        href={`/products?category=${category.slug}`}
+                        className="relative flex h-80 w-56 flex-col overflow-hidden rounded-lg p-6 hover:opacity-75 xl:w-auto"
+                      >
+                        <span aria-hidden="true" className="absolute inset-0">
+                          {category.image ? (
+                            <img
+                              alt={category.name}
+                              src={category.image}
+                              className="size-full object-cover"
+                            />
+                          ) : (
+                            <div className="size-full bg-gradient-to-br from-indigo-500 to-purple-600" />
+                          )}
+                        </span>
+                        <span
+                          aria-hidden="true"
+                          className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-gray-800 opacity-50"
                         />
-                      </span>
-                      <span
-                        aria-hidden="true"
-                        className="absolute inset-x-0 bottom-0 h-2/3 bg-linear-to-t from-gray-800 opacity-50"
-                      />
-                      <span className="relative mt-auto text-center text-xl font-bold text-white">
-                        {category.name}
-                      </span>
-                    </a>
-                  ))}
+                        <span className="relative mt-auto text-center text-xl font-bold text-white">
+                          {category.name}
+                        </span>
+                        {category.description && (
+                          <span className="relative text-center text-sm text-gray-200 mt-2">
+                            {category.description}
+                          </span>
+                        )}
+                      </Link>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
           </div>
 
           <div className="mt-6 px-4 sm:hidden">
-            <a
-              href="#"
+            <Link
+              href="/products"
               className="block text-sm font-semibold text-indigo-600 hover:text-indigo-500"
             >
-              Browse all categories
+              Browse all products
               <span aria-hidden="true"> &rarr;</span>
-            </a>
+            </Link>
           </div>
         </section>
 
@@ -672,21 +507,20 @@ export default function Example() {
                   id="social-impact-heading"
                   className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
                 >
-                  <span className="block sm:inline">Level up</span>
-                  <span className="block sm:inline">your desk</span>
+                  <span className="block sm:inline">Support</span>
+                  <span className="block sm:inline">Local Artisans</span>
                 </h2>
                 <p className="mt-3 text-xl text-white">
-                  Make your desk beautiful and organized. Post a picture to
-                  social media and watch it get more likes than life-changing
-                  announcements. Reflect on the shallow nature of existence. At
-                  least you have a really nice desk setup.
+                  Every purchase directly supports independent creators and helps preserve
+                  traditional craftsmanship skills. When you buy handmade, you're not just
+                  getting a product - you're supporting someone's passion and livelihood.
                 </p>
-                <a
-                  href="#"
+                <Link
+                  href="/products"
                   className="mt-8 block w-full rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100 sm:w-auto"
                 >
-                  Shop Workspace
-                </a>
+                  Browse Handcrafted Items
+                </Link>
               </div>
             </div>
           </div>
@@ -701,33 +535,77 @@ export default function Example() {
             id="collection-heading"
             className="text-2xl font-bold tracking-tight text-gray-900"
           >
-            Shop by Collection
+            Featured Handcrafted Products
           </h2>
           <p className="mt-4 text-base text-gray-500">
-            Each season, we collaborate with world-class designers to create a
-            collection inspired by the natural world.
+            Discover unique, handmade treasures from our talented artisan community.
+            Each piece is carefully crafted with love and attention to detail.
           </p>
 
           <div className="mt-10 space-y-12 lg:grid lg:grid-cols-3 lg:space-y-0 lg:gap-x-8">
-            {collections.map((collection) => (
-              <a
-                key={collection.name}
-                href={collection.href}
-                className="group block"
-              >
-                <img
-                  alt={collection.imageAlt}
-                  src={collection.imageSrc}
-                  className="aspect-3/2 w-full rounded-lg object-cover group-hover:opacity-75 lg:aspect-5/6"
-                />
-                <h3 className="mt-4 text-base font-semibold text-gray-900">
-                  {collection.name}
-                </h3>
-                <p className="mt-2 text-sm text-gray-500">
-                  {collection.description}
+            {loading ? (
+              // Loading placeholder
+              Array.from({ length: 3 }, (_, i) => (
+                <div key={i} className="group block animate-pulse">
+                  <div className="aspect-3/2 w-full rounded-lg bg-gray-200 lg:aspect-5/6" />
+                  <div className="mt-4 h-4 bg-gray-200 rounded w-3/4" />
+                  <div className="mt-2 h-3 bg-gray-200 rounded w-full" />
+                  <div className="mt-1 h-3 bg-gray-200 rounded w-2/3" />
+                </div>
+              ))
+            ) : featuredProducts.length > 0 ? (
+              featuredProducts.slice(0, 3).map((product) => (
+                <Link
+                  key={product._id}
+                  href={`/products/${product.slug}`}
+                  className="group block"
+                >
+                  <div className="aspect-3/2 w-full rounded-lg overflow-hidden bg-gray-200 group-hover:opacity-75 lg:aspect-5/6">
+                    {product.images[0] ? (
+                      <img
+                        alt={product.name}
+                        src={product.images[0]}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <ShoppingBagIcon className="h-16 w-16 text-white opacity-50" />
+                      </div>
+                    )}
+                  </div>
+                  <h3 className="mt-4 text-base font-semibold text-gray-900">
+                    {product.name}
+                  </h3>
+                  <div className="mt-2 flex items-center">
+                    <div className="flex">{renderStars(product.averageRating)}</div>
+                    <span className="ml-2 text-sm text-gray-500">
+                      ({product.totalReviews} reviews)
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-lg font-bold text-gray-900">
+                      ${product.price.toFixed(2)}
+                    </span>
+                    <span className="text-sm text-gray-500">
+                      by {product.seller.businessName || product.seller.name}
+                    </span>
+                  </div>
+                  {product.shortDescription && (
+                    <p className="mt-2 text-sm text-gray-500 line-clamp-2">
+                      {product.shortDescription}
+                    </p>
+                  )}
+                </Link>
+              ))
+            ) : (
+              <div className="col-span-3 text-center py-12">
+                <ShoppingBagIcon className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No featured products yet</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Check back soon for amazing handcrafted items!
                 </p>
-              </a>
-            ))}
+              </div>
+            )}
           </div>
         </section>
 
@@ -750,20 +628,20 @@ export default function Example() {
                   id="comfort-heading"
                   className="text-3xl font-bold tracking-tight text-white sm:text-4xl"
                 >
-                  Simple productivity
+                  {user?.role === 'seller' ? 'Showcase Your Craft' : 'Become an Artisan'}
                 </h2>
                 <p className="mt-3 text-xl text-white">
-                  Endless tasks, limited hours, a single piece of paper. Not
-                  really a haiku, but we're doing our best here. No kanban
-                  boards, burndown charts, or tangled flowcharts with our Focus
-                  system. Just the undeniable urge to fill empty circles.
+                  {user?.role === 'seller'
+                    ? 'Complete your seller profile and start listing your handcrafted products. Share your story, showcase your skills, and connect with customers who appreciate quality craftsmanship.'
+                    : 'Join our community of talented creators and start selling your handmade products. Turn your passion into profit and reach customers who value authentic, handcrafted items.'
+                  }
                 </p>
-                <a
-                  href="#"
+                <Link
+                  href={user?.role === 'seller' ? '/seller/profile' : (user ? '/seller/profile' : '/register')}
                   className="mt-8 block w-full rounded-md border border-transparent bg-white px-8 py-3 text-base font-medium text-gray-900 hover:bg-gray-100 sm:w-auto"
                 >
-                  Shop Focus
-                </a>
+                  {user?.role === 'seller' ? 'Complete Profile' : 'Start Selling'}
+                </Link>
               </div>
             </div>
           </div>
@@ -872,7 +750,7 @@ export default function Example() {
 
           <div className="border-t border-gray-800 py-10">
             <p className="text-sm text-gray-400">
-              Copyright &copy; 2021 Your Company, Inc.
+              Copyright &copy; 2024 Handcrafted Haven. All rights reserved.
             </p>
           </div>
         </div>
