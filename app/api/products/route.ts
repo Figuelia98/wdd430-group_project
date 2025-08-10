@@ -71,10 +71,17 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Get products
+    let selectFields = 'name slug shortDescription price comparePrice images averageRating totalReviews isFeatured createdAt';
+
+    // If seller is requesting their own products, include additional fields
+    if (seller) {
+      selectFields += ' inventory isActive';
+    }
+
     const products = await Product.find(query)
       .populate('category', 'name slug')
       .populate('seller', 'name businessName')
-      .select('name slug shortDescription price comparePrice images averageRating totalReviews isFeatured createdAt')
+      .select(selectFields)
       .sort(sortQuery)
       .skip(skip)
       .limit(limit);

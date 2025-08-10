@@ -342,6 +342,206 @@ export default function NewProductPage() {
             </div>
           </div>
 
+          {/* Inventory */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">Inventory</h2>
+
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={formData.inventory.trackQuantity}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    inventory: { ...prev.inventory, trackQuantity: e.target.checked }
+                  }))}
+                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                />
+                <span className="ml-2 text-sm text-gray-700">Track inventory quantity</span>
+              </label>
+            </div>
+
+            {formData.inventory.trackQuantity && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Quantity in Stock
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={formData.inventory.quantity}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      inventory: { ...prev.inventory, quantity: e.target.value }
+                    }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                <div className="flex items-center">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.inventory.allowBackorder}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        inventory: { ...prev.inventory, allowBackorder: e.target.checked }
+                      }))}
+                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                    <span className="ml-2 text-sm text-gray-700">Allow backorders when out of stock</span>
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Dimensions */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">Dimensions (Optional)</h2>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Length (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={formData.dimensions.length}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    dimensions: { ...prev.dimensions, length: e.target.value }
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="0.0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Width (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={formData.dimensions.width}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    dimensions: { ...prev.dimensions, width: e.target.value }
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="0.0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Height (cm)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={formData.dimensions.height}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    dimensions: { ...prev.dimensions, height: e.target.value }
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="0.0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Weight (g)
+                </label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  value={formData.dimensions.weight}
+                  onChange={(e) => setFormData(prev => ({
+                    ...prev,
+                    dimensions: { ...prev.dimensions, weight: e.target.value }
+                  }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="0.0"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Materials */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">Materials</h2>
+
+            {formData.materials.map((material, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={material}
+                  onChange={(e) => updateMaterial(index, e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., Wood, Cotton, Silver"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeMaterial(index)}
+                  className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addMaterial}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Add Material
+            </button>
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900">Tags</h2>
+            <p className="text-sm text-gray-600">Add tags to help customers find your product</p>
+
+            {formData.tags.map((tag, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  type="text"
+                  value={tag}
+                  onChange={(e) => updateTag(index, e.target.value)}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="e.g., handmade, vintage, eco-friendly"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeTag(index)}
+                  className="px-3 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={addTag}
+              className="px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 transition-colors"
+            >
+              Add Tag
+            </button>
+          </div>
+
           {/* Submit Button */}
           <div className="flex justify-end space-x-4">
             <Link

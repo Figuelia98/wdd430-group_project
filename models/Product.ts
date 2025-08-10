@@ -147,8 +147,7 @@ const ProductSchema = new Schema<IProduct>({
   timestamps: true
 });
 
-// Indexes for better query performance
-ProductSchema.index({ slug: 1 });
+// Indexes for better query performance (slug index is created by unique: true)
 ProductSchema.index({ category: 1 });
 ProductSchema.index({ seller: 1 });
 ProductSchema.index({ isActive: 1 });

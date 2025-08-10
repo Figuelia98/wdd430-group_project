@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -50,7 +50,8 @@ interface Order {
   estimatedDelivery?: string;
 }
 
-export default function OrderConfirmationPage({ params }: { params: { id: string } }) {
+export default function OrderConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = use(params);
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -60,11 +61,11 @@ export default function OrderConfirmationPage({ params }: { params: { id: string
     if (user) {
       fetchOrder();
     }
-  }, [user, params.id]);
+  }, [user, resolvedParams.id]);
 
   const fetchOrder = async () => {
     try {
-      const response = await fetch(`/api/orders/${params.id}`, {
+      const response = await fetch(`/api/orders/${resolvedParams.id}`, {
         credentials: 'include'
       });
 

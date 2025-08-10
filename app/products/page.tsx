@@ -133,7 +133,17 @@ export default function ProductsPage() {
         </div>
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Handcrafted Products</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            {filters.search ? `Search Results for "${filters.search}"` : 'Handcrafted Products'}
+          </h1>
+          {pagination && (
+            <p className="text-gray-600">
+              {filters.search
+                ? `Found ${pagination.totalProducts} ${pagination.totalProducts === 1 ? 'product' : 'products'} matching "${filters.search}"`
+                : `Showing ${pagination.totalProducts} ${pagination.totalProducts === 1 ? 'product' : 'products'}`
+              }
+            </p>
+          )}
           
           {/* Filters */}
           <div className="bg-white p-6 rounded-lg shadow-sm">

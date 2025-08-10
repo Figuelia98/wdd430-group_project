@@ -128,6 +128,106 @@ export default function AboutPage() {
         </div>
       </div>
 
+      {/* How It Works Section */}
+      <div className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-lg text-gray-600">
+              Discover how Handcrafted Haven connects artisans with customers
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            {/* For Buyers */}
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">For Buyers</h3>
+              <div className="space-y-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Browse & Discover</h4>
+                    <p className="text-gray-600">Explore our curated collection of handmade products from talented artisans worldwide.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Add to Cart</h4>
+                    <p className="text-gray-600">Select your favorite items and add them to your shopping cart for easy checkout.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Secure Checkout</h4>
+                    <p className="text-gray-600">Complete your purchase with our secure payment system and provide shipping details.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    4
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Receive & Review</h4>
+                    <p className="text-gray-600">Get your handcrafted items delivered and share your experience with reviews.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* For Sellers */}
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6 text-center">For Artisans</h3>
+              <div className="space-y-6">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Create Account</h4>
+                    <p className="text-gray-600">Sign up as a seller and set up your artisan profile with your story and specialties.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">List Products</h4>
+                    <p className="text-gray-600">Upload beautiful photos and detailed descriptions of your handcrafted items.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Manage Orders</h4>
+                    <p className="text-gray-600">Receive orders, manage inventory, and communicate with customers through our platform.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center text-sm font-bold mr-4">
+                    4
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900 mb-1">Grow Business</h4>
+                    <p className="text-gray-600">Build your customer base, receive reviews, and grow your handcraft business.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Values Section */}
       <div className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

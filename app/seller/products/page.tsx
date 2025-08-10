@@ -16,7 +16,7 @@ interface Product {
     _id: string;
     name: string;
   };
-  inventory: {
+  inventory?: {
     quantity: number;
     trackQuantity: boolean;
   };
@@ -51,6 +51,7 @@ export default function SellerProductsPage() {
       }
 
       const data = await response.json();
+      console.log('Products data:', data.products); // Debug log
       setProducts(data.products);
     } catch (err: any) {
       setError(err.message);
@@ -187,9 +188,15 @@ export default function SellerProductsPage() {
                     ${product.price.toFixed(2)}
                   </p>
                   
-                  {product.inventory.trackQuantity && (
+                  {product.inventory?.trackQuantity && (
                     <p className="text-sm text-gray-600 mb-4">
-                      Stock: {product.inventory.quantity} units
+                      Stock: {product.inventory?.quantity || 0} units
+                    </p>
+                  )}
+
+                  {!product.inventory && (
+                    <p className="text-sm text-gray-500 mb-4">
+                      Inventory not configured
                     </p>
                   )}
 

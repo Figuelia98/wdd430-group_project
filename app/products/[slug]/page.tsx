@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import Link from 'next/link';
 import Navigation from '@/components/Navigation';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -14,7 +14,7 @@ interface Product {
   _id: string;
   name: string;
   slug: string;
-  description: string;
+  description?: string;
   shortDescription?: string;
   price: number;
   comparePrice?: number;
@@ -30,7 +30,7 @@ interface Product {
     businessName?: string;
     businessDescription?: string;
   };
-  inventory: {
+  inventory?: {
     quantity: number;
     trackQuantity: boolean;
     allowBackorder: boolean;
@@ -48,7 +48,8 @@ interface Product {
   createdAt: string;
 }
 
-export default function ProductDetailPage({ params }: { params: { slug: string } }) {
+export default function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const resolvedParams = use(params);
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -58,19 +59,19 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
 
   useEffect(() => {
     fetchProduct();
-  }, [params.slug]);
+  }, [resolvedParams.slug]);
 
   const fetchProduct = async () => {
     setLoading(true);
     try {
       // First try to find by slug
-      const response = await fetch(`/api/products?search=${params.slug}&limit=1`);
+      const response = await fetch(`/api/products?search=${resolvedParams.slug}&limit=1`);
       if (!response.ok) {
         throw new Error('Failed to fetch product');
       }
 
       const data = await response.json();
-      const foundProduct = data.products.find((p: Product) => p.slug === params.slug);
+      const foundProduct = data.products.find((p: Product) => p.slug === resolvedParams.slug);
       
       if (!foundProduct) {
         throw new Error('Product not found');
@@ -228,13 +229,13 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
             </div>
 
             {/* Stock Status */}
-            {product.inventory.trackQuantity && (
+            {product.inventory?.trackQuantity && (
               <div className="mb-6">
-                {product.inventory.quantity > 0 ? (
+                {(product.inventory?.quantity || 0) > 0 ? (
                   <p className="text-green-600 font-medium">
-                    ✓ In stock ({product.inventory.quantity} available)
+                    ✓ In stock ({product.inventory?.quantity || 0} available)
                   </p>
-                ) : product.inventory.allowBackorder ? (
+                ) : product.inventory?.allowBackorder ? (
                   <p className="text-yellow-600 font-medium">
                     ⚠ Available for backorder
                   </p>
@@ -324,11 +325,15 @@ export default function ProductDetailPage({ params }: { params: { slug: string }
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Description</h2>
           <div className="prose max-w-none text-gray-600">
-            {product.description.split('\n').map((paragraph, index) => (
-              <p key={index} className="mb-4 last:mb-0">
-                {paragraph}
-              </p>
-            ))}
+            {product.description ? (
+              product.description.split('\n').map((paragraph, index) => (
+                <p key={index} className="mb-4 last:mb-0">
+                  {paragraph}
+                </p>
+              ))
+            ) : (
+              <p className="text-gray-500 italic">No description available.</p>
+            )}
           </div>
         </div>
 

@@ -15,7 +15,7 @@ interface Product {
     name: string;
     businessName?: string;
   };
-  inventory: {
+  inventory?: {
     quantity: number;
     trackQuantity: boolean;
     allowBackorder: boolean;
@@ -42,11 +42,11 @@ export default function AddToCartButton({
   const [justAdded, setJustAdded] = useState(false);
 
   const currentQuantityInCart = getItemQuantity(product._id);
-  const maxQuantity = product.inventory.trackQuantity 
-    ? Math.max(0, product.inventory.quantity - currentQuantityInCart)
+  const maxQuantity = product.inventory?.trackQuantity
+    ? Math.max(0, (product.inventory?.quantity || 0) - currentQuantityInCart)
     : 999;
 
-  const canAddToCart = maxQuantity > 0 || product.inventory.allowBackorder;
+  const canAddToCart = maxQuantity > 0 || product.inventory?.allowBackorder;
   const isOwnProduct = user?.id === product.seller._id;
 
   const handleAddToCart = async () => {
@@ -64,7 +64,7 @@ export default function AddToCartButton({
           id: product.seller._id,
           name: product.seller.businessName || product.seller.name
         },
-        maxQuantity: product.inventory.trackQuantity ? product.inventory.quantity : undefined
+        maxQuantity: product.inventory?.trackQuantity ? product.inventory?.quantity : undefined
       };
 
       addItem(cartItem, selectedQuantity);
@@ -86,7 +86,7 @@ export default function AddToCartButton({
     );
   }
 
-  if (!canAddToCart && !product.inventory.allowBackorder) {
+  if (!canAddToCart && !product.inventory?.allowBackorder) {
     return (
       <div className={`text-center ${className}`}>
         <button
@@ -118,7 +118,7 @@ export default function AddToCartButton({
               </option>
             ))}
           </select>
-          {product.inventory.trackQuantity && (
+          {product.inventory?.trackQuantity && (
             <p className="text-sm text-gray-500 mt-1">
               {maxQuantity} available
             </p>
@@ -128,7 +128,7 @@ export default function AddToCartButton({
 
       <button
         onClick={handleAddToCart}
-        disabled={isAdding || (!canAddToCart && !product.inventory.allowBackorder)}
+        disabled={isAdding || (!canAddToCart && !product.inventory?.allowBackorder)}
         className={`
           w-full flex items-center justify-center px-6 py-3 rounded-md font-medium transition-colors
           ${justAdded 

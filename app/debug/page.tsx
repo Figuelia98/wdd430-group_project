@@ -40,9 +40,9 @@ export default function DebugPage() {
 
   const fixProducts = async () => {
     try {
-      const response = await fetch('/api/admin/fix-products', { 
-        method: 'POST', 
-        credentials: 'include' 
+      const response = await fetch('/api/admin/fix-products', {
+        method: 'POST',
+        credentials: 'include'
       });
       const data = await response.json();
       alert(`Fixed ${data.fixedProducts} products`);
@@ -50,6 +50,21 @@ export default function DebugPage() {
     } catch (error) {
       console.error('Fix products error:', error);
       alert('Error fixing products');
+    }
+  };
+
+  const createTestProducts = async () => {
+    try {
+      const response = await fetch('/api/admin/create-test-products', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      const data = await response.json();
+      alert(`Created ${data.createdProducts || 0} test products`);
+      fetchDebugInfo(); // Refresh data
+    } catch (error) {
+      console.error('Create test products error:', error);
+      alert('Error creating test products');
     }
   };
 
@@ -89,12 +104,20 @@ export default function DebugPage() {
               <div className="bg-white p-6 rounded-lg shadow">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-semibold">Products ({products.length})</h2>
-                  <button
-                    onClick={fixProducts}
-                    className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-                  >
-                    Fix Products
-                  </button>
+                  <div className="space-x-2">
+                    <button
+                      onClick={fixProducts}
+                      className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                      Fix Products
+                    </button>
+                    <button
+                      onClick={createTestProducts}
+                      className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                    >
+                      Create Test Products
+                    </button>
+                  </div>
                 </div>
                 <pre className="bg-gray-100 p-4 rounded text-sm overflow-auto max-h-96">
                   {JSON.stringify(products, null, 2)}

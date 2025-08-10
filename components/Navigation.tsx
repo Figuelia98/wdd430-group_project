@@ -1,16 +1,30 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
+import ShoppingCart from './ShoppingCart';
+import SearchAutocomplete from './SearchAutocomplete';
+import { ShoppingBagIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 
 export default function Navigation() {
   const { user, logout, loading } = useAuth();
+  const { totalItems } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleLogout = async () => {
     try {
       await logout();
     } catch (error) {
       console.error('Logout failed:', error);
+    }
+  };
+
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      window.location.href = `/products?search=${encodeURIComponent(query.trim())}`;
     }
   };
 
@@ -49,14 +63,56 @@ export default function Navigation() {
                 Featured
               </Link>
               {user?.role === 'seller' && (
-                <Link href="/seller/products" className="text-gray-700 hover:text-indigo-600 transition-colors">
-                  My Products
-                </Link>
+                <>
+                  <Link href="/seller/products" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                    My Products
+                  </Link>
+                  <Link href="/seller/orders" className="text-gray-700 hover:text-indigo-600 transition-colors">
+                    My Orders
+                  </Link>
+                </>
               )}
             </div>
+
+            {/* Mobile Search Button */}
+            <button
+              onClick={() => {
+                const searchInput = document.getElementById('mobile-search');
+                if (searchInput) {
+                  searchInput.focus();
+                }
+              }}
+              className="md:hidden p-2 text-gray-700 hover:text-indigo-600 transition-colors"
+            >
+              <MagnifyingGlassIcon className="h-5 w-5" />
+            </button>
           </div>
 
           <div className="flex items-center space-x-4">
+            {/* Search Bar */}
+            <div className="hidden md:block">
+              <SearchAutocomplete
+                value={searchQuery}
+                onChange={setSearchQuery}
+                onSubmit={handleSearch}
+                placeholder="Search products..."
+                className="w-64"
+              />
+            </div>
+
+            {/* Cart Icon */}
+            <button
+              onClick={() => setIsCartOpen(true)}
+              className="relative p-2 text-gray-700 hover:text-indigo-600 transition-colors"
+            >
+              <ShoppingBagIcon className="h-6 w-6" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-indigo-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {totalItems > 99 ? '99+' : totalItems}
+                </span>
+              )}
+            </button>
+
             {user ? (
               <>
                 <span className="text-sm text-gray-700 hidden sm:block">
@@ -95,7 +151,21 @@ export default function Navigation() {
             )}
           </div>
         </div>
+
+        {/* Mobile Search Bar */}
+        <div className="md:hidden px-4 pb-4">
+          <SearchAutocomplete
+            value={searchQuery}
+            onChange={setSearchQuery}
+            onSubmit={handleSearch}
+            placeholder="Search products..."
+            className="w-full"
+          />
+        </div>
       </div>
+
+      {/* Shopping Cart Sidebar */}
+      <ShoppingCart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </nav>
   );
 }

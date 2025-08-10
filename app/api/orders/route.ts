@@ -129,6 +129,11 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Generate order number
+    const timestamp = Date.now().toString();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const orderNumber = `HH-${timestamp.slice(-6)}-${random}`;
+
     // Simulate payment processing
     let paymentStatus = 'completed';
     let transactionId = `txn_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
@@ -143,6 +148,7 @@ export async function POST(request: NextRequest) {
 
     // Create the order
     const order = new Order({
+      orderNumber,
       buyer: user.id,
       items: items.map(item => ({
         product: item.product,

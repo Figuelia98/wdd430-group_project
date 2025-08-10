@@ -228,14 +228,6 @@ OrderSchema.index({ orderNumber: 1 });
 OrderSchema.index({ status: 1 });
 OrderSchema.index({ 'items.seller': 1, createdAt: -1 });
 
-// Generate order number before saving
-OrderSchema.pre('save', function(next) {
-  if (this.isNew && !this.orderNumber) {
-    const timestamp = Date.now().toString();
-    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
-    this.orderNumber = `HH-${timestamp.slice(-6)}-${random}`;
-  }
-  next();
-});
+// Order number is generated in the API before saving
 
 export default mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
